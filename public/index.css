@@ -1,0 +1,10 @@
+.panel {
+  width: 70%;
+  float: left;
+  height: 50%;
+}
+
+.aside {
+  width: 30%;
+  float: right;
+}

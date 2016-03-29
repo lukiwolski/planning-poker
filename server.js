@@ -5,8 +5,10 @@ import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { match, RouterContext } from 'react-router'
 import routes from './modules/routes'
+import SocketIo from 'socket.io'
 
-var app = express()
+const PORT = process.env.PORT || 8080
+const app = express()
 
 app.use(compression())
 
@@ -30,6 +32,17 @@ app.get('*', (req, res) => {
   })
 })
 
+const server = app.listen(PORT, 'localhost', function(err) {
+  if (err) {
+    console.log(err);
+    return;
+  }
+  console.log('server listening on port: %s', PORT);
+});
+
+const io = new SocketIo(server)
+const socketEvents = require('./socketEvents')(io);
+
 function renderPage(appHtml) {
   return `
     <!doctype html public="storage">
@@ -41,8 +54,3 @@ function renderPage(appHtml) {
     <script src="/bundle.js"></script>
    `
 }
-
-var PORT = process.env.PORT || 8080
-app.listen(PORT, function() {
-  console.log('Production Express server running at localhost:' + PORT)
-})
