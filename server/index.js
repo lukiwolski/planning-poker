@@ -4,10 +4,9 @@ import compression from 'compression'
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { match, RouterContext } from 'react-router'
-import routes from './modules/routes'
 import SocketIo from 'socket.io'
+import routes from '../common/routes'
 
-const PORT = process.env.PORT || 8080
 const app = express()
 
 app.use(compression())
@@ -32,25 +31,30 @@ app.get('*', (req, res) => {
   })
 })
 
-const server = app.listen(PORT, 'localhost', function(err) {
-  if (err) {
-    console.log(err);
-    return;
-  }
-  console.log('server listening on port: %s', PORT);
-});
+const http = require('http').Server(app)
+const io = SocketIo(http)
 
-const io = new SocketIo(server)
-const socketEvents = require('./socketEvents')(io);
+io.on('connection', function(socket){
+  console.log('a user connected');
+
+  socket.on('send:message', function(msg) {
+    socket.broadcast.emit('send:message', msg);
+  })
+});
 
 function renderPage(appHtml) {
   return `
-    <!doctype html public="storage">
-    <html>
+  <!doctype html public="storage">
+  <html>
     <meta charset=utf-8/>
     <title>Planning Poker</title>
     <link rel=stylesheet href=/index.css>
     <div id=app>${appHtml}</div>
     <script src="/bundle.js"></script>
-   `
-}
+    `
+  }
+
+var PORT = process.env.PORT || 8080
+http.listen(PORT, function() {
+  console.log('Production Express server running at localhost:' + PORT)
+})

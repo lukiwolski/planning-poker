@@ -44,7 +44,7 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(__dirname) {'use strict';
+	'use strict';
 
 	var _express = __webpack_require__(1);
 
@@ -66,17 +66,16 @@
 
 	var _reactRouter = __webpack_require__(6);
 
-	var _routes = __webpack_require__(7);
-
-	var _routes2 = _interopRequireDefault(_routes);
-
-	var _socket = __webpack_require__(13);
+	var _socket = __webpack_require__(7);
 
 	var _socket2 = _interopRequireDefault(_socket);
 
+	var _routes = __webpack_require__(8);
+
+	var _routes2 = _interopRequireDefault(_routes);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var PORT = process.env.PORT || 8080;
 	var app = (0, _express2.default)();
 
 	app.use((0, _compression2.default)());
@@ -101,21 +100,25 @@
 	  });
 	});
 
-	var server = app.listen(PORT, 'localhost', function (err) {
-	  if (err) {
-	    console.log(err);
-	    return;
-	  }
-	  console.log('server listening on port: %s', PORT);
-	});
+	var http = __webpack_require__(14).Server(app);
+	var io = (0, _socket2.default)(http);
 
-	var io = new _socket2.default(server);
-	var socketEvents = __webpack_require__(14)(io);
+	io.on('connection', function (socket) {
+	  console.log('a user connected');
+
+	  socket.on('send:message', function (msg) {
+	    socket.broadcast.emit('send:message', msg);
+	  });
+	});
 
 	function renderPage(appHtml) {
 	  return '\n    <!doctype html public="storage">\n    <html>\n    <meta charset=utf-8/>\n    <title>Planning Poker</title>\n    <link rel=stylesheet href=/index.css>\n    <div id=app>' + appHtml + '</div>\n    <script src="/bundle.js"></script>\n   ';
 	}
-	/* WEBPACK VAR INJECTION */}.call(exports, ""))
+
+	var PORT = process.env.PORT || 8080;
+	http.listen(PORT, function () {
+	  console.log('Production Express server running at localhost:' + PORT);
+	});
 
 /***/ },
 /* 1 */
@@ -155,6 +158,12 @@
 
 /***/ },
 /* 7 */
+/***/ function(module, exports) {
+
+	module.exports = require("socket.io");
+
+/***/ },
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -165,29 +174,16 @@
 
 	var _reactRouter = __webpack_require__(6);
 
-	var _App = __webpack_require__(8);
+	var _App = __webpack_require__(9);
 
 	var _App2 = _interopRequireDefault(_App);
 
-	var _Home = __webpack_require__(10);
-
-	var _Home2 = _interopRequireDefault(_Home);
-
-	var _Lobby = __webpack_require__(12);
-
-	var _Lobby2 = _interopRequireDefault(_Lobby);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	module.exports = _react2.default.createElement(
-	  _reactRouter.Route,
-	  { path: '/', component: _App2.default },
-	  _react2.default.createElement(_reactRouter.IndexRoute, { component: _Home2.default }),
-	  _react2.default.createElement(_reactRouter.Route, { path: 'lobby/:name', component: _Lobby2.default })
-	);
+	module.exports = _react2.default.createElement(_reactRouter.Route, { path: '/', component: _App2.default });
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -200,38 +196,63 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _socket = __webpack_require__(9);
+	var _socket = __webpack_require__(10);
 
 	var _socket2 = _interopRequireDefault(_socket);
 
+	var _MessageForm = __webpack_require__(11);
+
+	var _MessageForm2 = _interopRequireDefault(_MessageForm);
+
+	var _MessageList = __webpack_require__(12);
+
+	var _MessageList2 = _interopRequireDefault(_MessageList);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var socket = (0, _socket2.default)('http://localhost:8080');
+	var socket = (0, _socket2.default)('');
 
 	exports.default = _react2.default.createClass({
 	  displayName: 'App',
+	  getInitialState: function getInitialState() {
+	    return {
+	      messages: ['some some', 'some mo']
+	    };
+	  },
+	  componentDidMount: function componentDidMount() {
+	    socket.on('send:message', this.messageRecieve);
+	  },
+	  messageRecieve: function messageRecieve(message) {
+	    var messages = this.state.messages;
+
+	    messages.push(message);
+	    this.setState({ messages: messages });
+	  },
+	  handleMessageSubmit: function handleMessageSubmit(message) {
+	    var messages = this.state.messages;
+
+	    messages.push(message);
+	    this.setState({ messages: messages });
+	    socket.emit('send:message', message);
+	  },
 	  render: function render() {
 	    return _react2.default.createElement(
 	      'div',
 	      null,
-	      _react2.default.createElement(
-	        'h1',
-	        null,
-	        'Planning Poker'
-	      ),
-	      this.props.children
+	      _react2.default.createElement(_MessageForm2.default, { onMessageSubmit: this.handleMessageSubmit }),
+	      _react2.default.createElement(_MessageList2.default, { messages: this.state.messages })
 	    );
 	  }
 	});
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports) {
 
 	module.exports = require("socket.io-client");
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -244,93 +265,37 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Loginform = __webpack_require__(11);
-
-	var _Loginform2 = _interopRequireDefault(_Loginform);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	exports.default = _react2.default.createClass({
-	  displayName: 'Home',
-
-	  contextTypes: {
-	    router: _react2.default.PropTypes.object.isRequired
-	  },
+	  displayName: 'MessageForm',
 	  getInitialState: function getInitialState() {
 	    return {
-	      inputText: '',
-	      error: false
+	      text: ''
 	    };
 	  },
-	  handleSubmitForm: function handleSubmitForm(e) {
+	  handleSubmit: function handleSubmit(e) {
 	    e.preventDefault();
 
-	    var name = this.state.inputText;
+	    var message = this.state.text;
 
-	    if (!name || name.length <= 3) {
-	      this.setState({ error: true });
-	      return;
-	    }
-
-	    this.context.router.push('lobby/' + name);
+	    this.props.onMessageSubmit(message);
+	    this.setState({ text: '' });
 	  },
-	  handleInputChange: function handleInputChange(e) {
-	    this.setState({
-	      inputText: e.target.value
-	    });
+	  changeHandler: function changeHandler(e) {
+	    this.setState({ text: e.target.value });
 	  },
 	  render: function render() {
-	    return _react2.default.createElement(_Loginform2.default, {
-	      onSubmitForm: this.handleSubmitForm,
-	      onInputChange: this.handleInputChange,
-	      username: this.state.inputText,
-	      error: this.state.error
-	    });
+	    return _react2.default.createElement(
+	      'form',
+	      { onSubmit: this.handleSubmit },
+	      _react2.default.createElement('input', {
+	        onChange: this.changeHandler,
+	        value: this.state.text
+	      })
+	    );
 	  }
 	});
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _react = __webpack_require__(4);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	exports.default = function (_ref) {
-	  var onSubmitForm = _ref.onSubmitForm;
-	  var onInputChange = _ref.onInputChange;
-	  var username = _ref.username;
-	  var error = _ref.error;
-	  return _react2.default.createElement(
-	    "form",
-	    { onSubmit: onSubmitForm },
-	    _react2.default.createElement("input", {
-	      type: "text",
-	      placeholder: "Your name",
-	      value: username,
-	      onChange: onInputChange
-	    }),
-	    _react2.default.createElement(
-	      "button",
-	      null,
-	      "Ok"
-	    ),
-	    error && _react2.default.createElement(
-	      "p",
-	      null,
-	      "Your name has to be at least 4 characters long"
-	    )
-	  );
-	};
 
 /***/ },
 /* 12 */
@@ -339,7 +304,48 @@
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
+	});
+
+	var _react = __webpack_require__(4);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Message = __webpack_require__(13);
+
+	var _Message2 = _interopRequireDefault(_Message);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	exports.default = _react2.default.createClass({
+	    displayName: 'MessageList',
+	    render: function render() {
+	        return _react2.default.createElement(
+	            'div',
+	            { className: 'messages' },
+	            _react2.default.createElement(
+	                'h2',
+	                null,
+	                ' Conversation: '
+	            ),
+	            this.props.messages.map(function (message, i) {
+	                return _react2.default.createElement(_Message2.default, {
+	                    key: i,
+	                    text: message
+	                });
+	            })
+	        );
+	    }
+	});
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
 	});
 
 	var _react = __webpack_require__(4);
@@ -348,72 +354,23 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	exports.default = _react2.default.createClass({
-	  displayName: 'Lobby',
-	  getInitialState: function getInitialState() {
-	    return {
-	      chat: {
-	        author: 'qweqwe',
-	        message: 'werwer'
-	      }
-	    };
-	  },
-	  handleSubmit: function handleSubmit(e) {
-	    e.preventDefault();
-
-	    // setState({
-	    //   chat.author: this.props.params.name,
-	    //   chat.message: this.refs.messageField.value
-	    // })
-	  },
-	  render: function render() {
+	exports.default = function (props) {
 	    return _react2.default.createElement(
-	      'div',
-	      null,
-	      _react2.default.createElement(
-	        'div',
-	        { className: 'panel primary' },
-	        'Deckbox'
-	      ),
-	      _react2.default.createElement(
-	        'div',
-	        { className: 'panel secondary' },
+	        "div",
+	        { className: "message" },
 	        _react2.default.createElement(
-	          'form',
-	          { onSubmit: this.handleSubmit },
-	          _react2.default.createElement('input', {
-	            ref: 'messageField'
-	          })
+	            "span",
+	            null,
+	            props.text
 	        )
-	      ),
-	      _react2.default.createElement(
-	        'div',
-	        { className: 'aside' },
-	        this.state.chat.author,
-	        ': ',
-	        this.state.chat.message
-	      )
 	    );
-	  }
-	});
-
-/***/ },
-/* 13 */
-/***/ function(module, exports) {
-
-	module.exports = require("socket.io");
+	};
 
 /***/ },
 /* 14 */
 /***/ function(module, exports) {
 
-	'use strict';
-
-	exports = module.exports = function (io) {
-	  io.on('connection', function (socket) {
-	    console.log('asd');
-	  });
-	};
+	module.exports = require("http");
 
 /***/ }
 /******/ ]);

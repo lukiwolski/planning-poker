@@ -3,7 +3,7 @@ var path = require('path')
 
 module.exports = {
 
-  entry: path.resolve(__dirname, 'server.js'),
+  entry: path.resolve(path.join(__dirname, 'server', 'index.js')),
 
   output: {
     filename: 'server.bundle.js'
@@ -20,8 +20,8 @@ module.exports = {
   }, {}),
 
   node: {
-    __filename: true,
-    __dirname: true
+    __filename: false,
+    __dirname: false
   },
 
   module: {
