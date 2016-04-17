@@ -5,10 +5,13 @@ import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { match, RouterContext } from 'react-router'
 import SocketIo from 'socket.io'
-import routes from '../common/routes'
+import cookie from 'react-cookie'
+import cookieParser from 'cookie-parser'
+import routes from '../common/components/routes'
 
 const app = express()
 
+app.use(cookieParser())
 app.use(compression())
 
 // serve our static stuff like index.css
@@ -23,6 +26,7 @@ app.get('*', (req, res) => {
       res.redirect(redirect.pathname + redirect.search)
     } else if (props) {
       // hey we made it!
+      cookie.plugToRequest(req, res);
       const appHtml = renderToString(<RouterContext {...props}/>)
       res.send(renderPage(appHtml))
     } else {
