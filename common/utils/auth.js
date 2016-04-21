@@ -2,9 +2,45 @@ import Firebase from 'firebase'
 import cookie from 'react-cookie'
 
 const firebaseRef = new Firebase('https://blinding-fire-4472.firebaseio.com')
+const usersRef = firebaseRef.child('users')
 const token = 'token'
 
 module.exports = {
+  registerUser(name, email, pass) {
+    return new Promise((resolve, reject) => {
+      firebaseRef.createUser({
+        email    : email,
+        password : pass
+      }, (error, userData) => {
+        if (error) {
+          reject(error)
+        } else {
+          this.createFirebaseUser(userData.uid, name)
+          resolve(userData)
+        }
+      })
+    })
+  },
+
+  createFirebaseUser(uid, name) {
+    usersRef.child(uid).set({
+      name: name
+    })
+  },
+
+  fetchUserName(uid) {
+    return new Promise((resolve, reject) => {
+      usersRef.child(uid).once('value', (snapshot) => {
+        if(snapshot) {
+          resolve(snapshot.child('name').val())
+        }
+        else {
+          reject('no user like that')
+        }
+      })
+    })
+  },
+
   login(email, pass) {
     return new Promise((resolve, reject) => {
       if(cookie.load(token)) {
@@ -19,9 +55,13 @@ module.exports = {
             this.onChange(false)
             reject(error)
           } else {
-            cookie.save(token, authData)
-            this.onChange(true)
-            resolve(authData)
+            this.fetchUserName(authData.uid)
+              .then((name) => {
+                this.saveToken(name)
+                this.onChange(true)
+                resolve(authData)
+              })
+              .catch((err) => { console.log(err )})
           }
         })
       }
@@ -35,12 +75,16 @@ module.exports = {
           this.onChange(false)
           reject(error)
         } else {
-          cookie.save(token, authData)
+          this.saveToken(authData.facebook.displayName)
           this.onChange(true)
           resolve(authData)
         }
       })
     })
+  },
+
+  saveToken(name) {
+    cookie.save(token, name)
   },
 
   getToken() {

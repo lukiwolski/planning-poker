@@ -28,7 +28,10 @@ export default React.createClass({
             {this.state.loggedIn ? (
               <Link to="/logout">Logout</Link>
               ) : (
-              <Link to="/login">Login</Link>
+              <div>
+                <Link to="/login">Login</Link>         
+                <Link to="/register">Register</Link>
+              </div>
             )}
           </li>
           <li><Link to="/lobby">Dashboard</Link></li>

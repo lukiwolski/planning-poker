@@ -52,7 +52,6 @@ function renderPage(appHtml) {
   <html>
     <meta charset=utf-8/>
     <title>Planning Poker</title>
-    <link rel=stylesheet href=/index.css>
     <div id=app>${appHtml}</div>
     <script src="/bundle.js"></script>
     `

@@ -11,7 +11,8 @@ export default React.createClass({
             return (
               <Message
                 key={i}
-                text={message}
+                text={message.text}
+                user={message.user}
                 />
             )
           })

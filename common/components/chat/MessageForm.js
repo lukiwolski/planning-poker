@@ -9,7 +9,10 @@ export default React.createClass({
   handleSubmit(e) {
     e.preventDefault()
 
-    let message = this.state.text
+    let message = {
+      user: this.props.user,
+      text: this.state.text
+    }    
 
     this.props.onMessageSubmit(message)
     this.setState({ text: '' })

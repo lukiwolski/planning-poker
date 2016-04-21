@@ -28,7 +28,10 @@ export default React.createClass({
   render() {
     return (
       <div>
-        <MessageForm onMessageSubmit={this.handleMessageSubmit}/>
+        <MessageForm
+          onMessageSubmit={this.handleMessageSubmit}
+          user={this.props.user}
+        />
         <MessageList messages={this.state.messages}/>
       </div>
     )
