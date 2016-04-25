@@ -1,49 +1,46 @@
-import React from 'react'
-import { Router } from 'react-router'
-import auth from '../../utils/auth'
-import { Link } from 'react-router'
+import React from 'react';
+import auth from '../../utils/auth';
 
-export default React.createClass({
-  contextTypes: {
-    router: React.PropTypes.object.isRequired
-  },
-
-  getInitialState() {
-    return {
-      error: false
-    }
-  },
+class Login extends React.Component {
+  constructor() {
+    super();
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleFacebook = this.handleFacebook.bind(this);
+    this.state = {
+      error: false,
+    };
+  }
 
   handleSubmit(event) {
-    event.preventDefault()
+    event.preventDefault();
 
-    let email = this.refs.email.value
-    let pass = this.refs.pass.value
+    const email = this.refs.email.value;
+    const pass = this.refs.pass.value;
 
     auth.login(email, pass)
-      .then((response) => {
-        this.context.router.replace('/lobby')
+      .then(() => {
+        this.context.router.replace('/lobby');
       })
       .catch(() => {
-        return this.setState({ error: true })
-      })
-  },
+        this.setState({ error: true });
+      });
+  }
 
   handleFacebook() {
     auth.loginFacebook()
       .then(() => {
-        let { location } = this.props
+        const { location } = this.props;
 
         if (location.state && location.state.nextPathname) {
-          this.context.router.replace(location.state.nextPathname)
+          this.context.router.replace(location.state.nextPathname);
         } else {
-          this.context.router.replace('/')
+          this.context.router.replace('/');
         }
       })
       .catch(() => {
-        return this.setState({ error: true })
-      })
-  },
+        this.setState({ error: true });
+      });
+  }
 
   render() {
     return (
@@ -58,6 +55,16 @@ export default React.createClass({
         </form>
         <button onClick={this.handleFacebook}>Login with Facebook</button>
       </div>
-    )
+    );
   }
-})
+}
+
+Login.contextTypes = {
+  router: React.PropTypes.object.isRequired,
+};
+
+Login.propTypes = {
+  location: React.PropTypes.object,
+};
+
+export default Login;

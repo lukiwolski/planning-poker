@@ -1,54 +1,50 @@
-import React from 'react'
-import { Router } from 'react-router'
-import { Link } from 'react-router'
-import auth from '../../utils/auth'
+import React from 'react';
+import auth from '../../utils/auth';
 
-export default React.createClass({
-  contextTypes: {
-    router: React.PropTypes.object.isRequired
-  },
-
-  getInitialState() {
-    return {
-      error: false
-    }
-  },
+class Register extends React.Component {
+  constructor() {
+    super();
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.state = {
+      error: false,
+    };
+  }
 
   handleSubmit(e) {
-    e.preventDefault()
+    e.preventDefault();
 
-    let name = this.refs.first.value
-    let last = this.refs.last.value
-    let email = this.refs.mail.value
-    let pass1 = this.refs.pass.value
-    let pass2 = this.refs.passConfirm.value
+    const name = this.refs.first.value;
+    const last = this.refs.last.value;
+    const email = this.refs.mail.value;
+    const pass1 = this.refs.pass.value;
+    const pass2 = this.refs.passConfirm.value;
 
-    if(pass1 !== pass2) {
+    if (pass1 !== pass2) {
       this.setState({
-        error: "Mismatching password"
-      })
+        error: 'Mismatching password',
+      });
     }
 
-    if(pass1 == pass2) {
-      let fullName = `${name} ${last}`
+    if (pass1 === pass2) {
+      const fullName = `${name} ${last}`;
 
       auth.registerUser(fullName, email, pass1)
-        .then((user) => {
-          let { location } = this.props
+        .then(() => {
+          const { location } = this.props;
 
           if (location.state && location.state.nextPathname) {
-            this.context.router.replace(location.state.nextPathname)
+            this.context.router.replace(location.state.nextPathname);
           } else {
-            this.context.router.replace('/')
+            this.context.router.replace('/');
           }
         })
-        .catch((error) =>{
+        .catch((error) => {
           this.setState({
-            error: error
-          })
-        })
+            error,
+          });
+        });
     }
-  },
+  }
 
   render() {
     return (
@@ -64,6 +60,16 @@ export default React.createClass({
           {this.state.error}
         </form>
       </div>
-    )
+    );
   }
-})
+}
+
+Register.contextTypes = {
+  router: React.PropTypes.object.isRequired,
+};
+
+Register.propTypes = {
+  location: React.PropTypes.object,
+};
+
+export default Register;

@@ -1,23 +1,16 @@
-import React from 'react'
-import Message from './Message'
+import React from 'react';
+import Message from './Message';
 
-export default React.createClass({
-  render() {
-    return (
-      <div className='messages'>
-        <h2> Conversation: </h2>
-        {
-          this.props.messages.map((message, i) => {
-            return (
-              <Message
-                key={i}
-                text={message.text}
-                user={message.user}
-                />
-            )
-          })
-        }
-      </div>
-    )
-  }
-})
+const MessageList = props =>
+  <div className="messages">
+    <h2> Conversation: </h2>
+    {props.messages.map((message, i) =>
+      <Message key={i} text={message.text} user={message.user} />)
+    }
+  </div>;
+
+MessageList.propTypes = {
+  messages: React.PropTypes.array,
+};
+
+export default MessageList;

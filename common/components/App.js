@@ -1,43 +1,49 @@
-import React from 'react'
-import { Link } from 'react-router'
-import auth from '../utils/auth'
+import React from 'react';
+import { Link } from 'react-router';
+import auth from '../utils/auth';
 
-export default React.createClass({
-  getInitialState() {
-    return {
-      loggedIn: auth.loggedIn()
-    }
-  },
+class App extends React.Component {
+  constructor() {
+    super();
+    this.updateAuth = this.updateAuth.bind(this);
+    this.state = {
+      loggedIn: auth.loggedIn(),
+    };
+  }
+
+  componentWillMount() {
+    auth.onChange = this.updateAuth;
+    auth.login();
+  }
 
   updateAuth(loggedIn) {
     this.setState({
-      loggedIn: loggedIn
-    })
-  },
-
-  componentWillMount() {
-    auth.onChange = this.updateAuth
-    auth.login()
-  },
+      loggedIn,
+    });
+  }
 
   render() {
     return (
       <div>
         <ul>
-          <li>
-            {this.state.loggedIn ? (
-              <Link to="/logout">Logout</Link>
-              ) : (
-              <div>
-                <Link to="/login">Login</Link>         
-                <Link to="/register">Register</Link>
-              </div>
-            )}
-          </li>
+          {this.state.loggedIn ? (
+            <li><Link to="/logout">Logout</Link></li>
+            ) : (
+            [
+              <li key="1"><Link to="/login">Login</Link></li>,
+              <li key="2"><Link to="/register">Register</Link></li>,
+            ]
+          )}
           <li><Link to="/lobby">Dashboard</Link></li>
         </ul>
         {this.props.children || <p>You are {!this.state.loggedIn && 'not'} logged in.</p>}
       </div>
-    )
+    );
   }
-})
+}
+
+App.propTypes = {
+  children: React.PropTypes.node,
+};
+
+export default App;

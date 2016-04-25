@@ -1,7 +1,14 @@
-import React from 'react'
+import React from 'react';
 
-export default (props) =>
+const Message = (props) =>
   <div className="message">
     <strong>{props.user}: </strong>
     <span>{props.text}</span>
-  </div>
+  </div>;
+
+Message.propTypes = {
+  user: React.PropTypes.string,
+  text: React.PropTypes.string,
+};
+
+export default Message;

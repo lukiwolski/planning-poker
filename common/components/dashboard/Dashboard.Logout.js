@@ -1,24 +1,30 @@
-import React from 'react'
-import auth from '../../utils/auth'
+import React from 'react';
+import auth from '../../utils/auth';
 
-export default React.createClass({
-  contextTypes: {
-    router: React.PropTypes.object.isRequired
-  },
-
+class Logout extends React.Component {
   componentDidMount() {
-    auth.logout()
+    auth.logout();
 
-    let { location } = this.props
+    const { location } = this.props;
 
     if (location.state && location.state.nextPathname) {
-      this.context.router.replace(location.state.nextPathname)
+      this.context.router.replace(location.state.nextPathname);
     } else {
-      this.context.router.replace('/')
+      this.context.router.replace('/');
     }
-  },
+  }
 
   render() {
-    return <p>You are now Logged out</p>
+    return <p>You are now Logged out</p>;
   }
-})
+}
+
+Logout.contextTypes = {
+  router: React.PropTypes.object.isRequired,
+};
+
+Logout.propTypes = {
+  location: React.PropTypes.object,
+};
+
+export default Logout;
