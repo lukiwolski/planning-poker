@@ -1,7 +1,7 @@
 import React from 'react';
 import io from 'socket.io-client';
-import MessageForm from './MessageForm';
-import MessageList from './MessageList';
+import MessageList from '../components/chat/Chat.MessageList';
+import MessageForm from '../components/chat/Chat.MessageForm';
 
 const socket = io('');
 

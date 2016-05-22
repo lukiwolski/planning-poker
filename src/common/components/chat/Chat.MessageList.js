@@ -1,5 +1,5 @@
 import React from 'react';
-import Message from './Message';
+import Message from './Chat.Message';
 
 const MessageList = props =>
   <div className="messages">
